@@ -1,3 +1,5 @@
+
+from django.shortcuts import redirect
 from django.shortcuts import render,HttpResponse,HttpResponseRedirect,redirect
 from pathlib import Path
 # Create your views here.
@@ -7,6 +9,7 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.forms import formset_factory
+from django import  forms as fo
 from .models import Header,Records
 @login_required
 def home(request):
@@ -14,11 +17,14 @@ def home(request):
 
 
 def generateResponse(request):
+    # cretae response file when user hits submit in respnose form
     ResponseFileRecordsFormFormset=formset_factory(ResponseFileRecordsForm)
+
     if request.method == 'POST':
         formset = ResponseFileRecordsFormFormset(request.POST)
         form=ResponseFileForm(request.POST)
         if formset.is_valid() and form.is_valid():
+
             # do something with the formset.cleaned_data
             filename=form.cleaned_data.get('filename')
             f = open('static/outward/'+filename, 'wb+')
@@ -57,6 +63,8 @@ def generateResponse(request):
             filler=" "*460
             f.write(bytes(filler,'utf-8'))
             f.write(bytes('\n','utf-8'))
+            # header completed
+
             for form in formset:
                 recordIdentifer=form.cleaned_data.get('recordIdentifer')
                 if len(recordIdentifer)==2:
@@ -87,6 +95,7 @@ def generateResponse(request):
                 accountValidFlag = form.cleaned_data.get('accountValidFlag')
                 if len(accountValidFlag) == 2:
                     f.write(bytes(accountValidFlag, 'utf-8'))
+                    # if account is closed skip remaining fileds
                 if accountValidFlag=="02":
                     filler = " " * 435
                     f.write(bytes(filler, 'utf-8'))
@@ -100,6 +109,9 @@ def generateResponse(request):
                     record.save()
                 else:
                     jointAccountFlag = form.cleaned_data.get('jointAccountFlag')
+                    primaryAccountHolderName = form.cleaned_data.get('primaryAccountHolderName')
+                    secondaryAccountHolderName = form.cleaned_data.get('secondaryAccountHolderName')
+
                     if len(jointAccountFlag) == 2:
                         f.write(bytes(jointAccountFlag, 'utf-8'))
                     primaryPan = form.cleaned_data.get('primaryPan')
@@ -117,7 +129,7 @@ def generateResponse(request):
                         filler = " " * 10
                         f.write(bytes(filler, 'utf-8'))
 
-                    primaryAccountHolderName = form.cleaned_data.get('primaryAccountHolderName')
+
                     if len(primaryAccountHolderName) == 50:
                         f.write(bytes(primaryAccountHolderName, 'utf-8'))
                     else:
@@ -126,7 +138,7 @@ def generateResponse(request):
                         primaryAccountHolderName = primaryAccountHolderName + spaces
                         f.write(bytes(primaryAccountHolderName, 'utf-8'))
 
-                    secondaryAccountHolderName = form.cleaned_data.get('secondaryAccountHolderName')
+
                     if len(secondaryAccountHolderName) == 50:
                         f.write(bytes(secondaryAccountHolderName, 'utf-8'))
                     else:
@@ -147,21 +159,19 @@ def generateResponse(request):
                     record.save()
 
             f.close()
-
-
-
-
-
-
             print(formset.cleaned_data)
             print(form.cleaned_data)
             redirect('home')
         else:
             print(formset.errors)
+            formset = ResponseFileRecordsFormFormset(request.POST)
+            form = ResponseFileForm(request.POST)
+            return render(request, 'cbdtapp/Response.html', {'form': form, 'formset': formset})
 
     return render(request, 'cbdtapp/uploadfile.html')
 @login_required
 def upload_file(request):
+    # take text file and load it intp forms using form ResponseFileForm and ResponseFileRecordsForm Form set
     if request.method == 'POST':
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
@@ -171,7 +181,7 @@ def upload_file(request):
             records=context.get('records')
             fo=ResponseFileForm(
                 initial={'headerIdentifier': header.get('identifier'), 'orignatorCode': header.get('orignatorCode'), 'responderCode': header.get('responderCode'),
-                         'fileRefernceNo': header.get('fileRefernceNo'), 'totalNoOfRecords': header.get('totalNoOfRecords'),'filename':header.get('filename')})
+                         'fileRefernceNo': header.get('fileRefernceNo'), 'totalNoOfRecords': header.get('totalNoOfRecords'),'filename':header.get('filename').replace('CBDTUser',str(request.user))})
 
             ResponseFileRecordsFormFormset=formset_factory(ResponseFileRecordsForm,extra=int(header.get('totalNoOfRecords')))
             formset=ResponseFileRecordsFormFormset()
@@ -188,30 +198,28 @@ def upload_file(request):
         else:
             return HttpResponse("error")
     else:
+
         form = UploadFileForm()
         return render(request, 'cbdtapp/uploadfile.html', {'form': form})
 
 def handle_uploaded_file(f,request):
-    with open('static/inward/'+f.name, 'wb+') as destination:
-
-        for chunk in f.chunks():
-            destination.write(chunk)
+    #take file and return context
     context={}
     records = []
-
+    # read input file
     f = open('static/inward/'+f.name, 'r')
     if f.mode == 'r':
         Lines = f.readlines()
         count = 0
-        # Strips the newline character
+
 
         for line in Lines:
-
+            # read lines from file
 
             identifier=line[:2]
 
             if identifier=="30":
-
+                # if header record
                 orignatorCode = line[2:13]
                 responderCode = line[13:24]
                 fileRefernceNo = line[24:34]
@@ -220,10 +228,12 @@ def handle_uploaded_file(f,request):
                 FILENAME=FILENAME[:-3]+"RES.txt"
                 header={'identifier':identifier,'orignatorCode':orignatorCode,'responderCode':responderCode,'fileRefernceNo':fileRefernceNo,'totalNoOfRecords':totalNoOfRecords,'filename':FILENAME}
             if identifier=="70":
+                # if it is a record
                 recordRefrenceNo=line[2:17]
                 ifscCode=line[17:28]
                 bankAccountNo=line[28:63]
                 records.append({'identifier':identifier,'recordRefrenceNo':recordRefrenceNo,'ifscCode':ifscCode,'bankAccountNo':bankAccountNo})
+        # set the context
         context={'header':header,'records':records}
     return context
 

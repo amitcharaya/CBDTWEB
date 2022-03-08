@@ -2,49 +2,67 @@
 
 {% load crispy_forms_tags %}
 
+<style>
+
+</style>
 {%block content %}
+
+
 <br/>
 <form action="/generateresponse/" method="post"  enctype="multipart/form-data">
     {% csrf_token %}
     {{form}}
 
-    <hr/>
+
 
     {{ formset.management_form }}
+ <table class=" ">
 
         {% for form in formset %}
 
-        <table class="">
-            <br/>
-            <hr/>
-            <tr>
-                <td >{{ form.recordIdentifer.label }}<br/>{{ form.recordIdentifer }}</td>
 
-                <td >{{ form.recordRefernceNo.label }}<br/>{{ form.recordRefernceNo }}</td>
+
+            <tr>
+
                 <td >{{ form.ifscCode.label }}<br/>{{ form.ifscCode }}</td>
                 <td >   {{ form.destinationBankAccountNo.label }}<br/>  {{ form.destinationBankAccountNo }}</td>
 
-
-            </tr>
-
-            <tr>
-                   <td colspan="2"> {{ form.accountValidFlag.label }}<br/>{{ form.accountValidFlag }}</td>
-                     <td> {{ form.jointAccountFlag.label }}<br/>{{ form.jointAccountFlag }}</td>
+                 <td> {{ form.jointAccountFlag.label }}<br/>{{ form.jointAccountFlag }}</td>
                  <td>  {{ form.primaryPan.label }}<br/>{{ form.primaryPan }}</td>
 
+                  <td> {{ form.primaryAccountHolderName.label }}<br/>{{ form.primaryAccountHolderName }}</td>
+
+                     <td>   {{ form.secondaryPan.label }}<br/>{{ form.secondaryPan }}</td>
+                 <td>  {{ form.secondaryAccountHolderName.label }}<br/>{{ form.secondaryAccountHolderName }}
+
+                                           </td>
 
             </tr>
+
             <tr>
-                <td>   {{ form.secondaryPan.label }}<br/>{{ form.secondaryPan }}</td>
-                 <td> {{ form.primaryAccountHolderName.label }}<br/>{{ form.primaryAccountHolderName }}</td>
-                <td>  {{ form.secondaryAccountHolderName.label }}<br/>{{ form.secondaryAccountHolderName }}</td>
-                 <td>   {{ form.accountType.label }}<br/> {{ form.accountType }}</td>
 
+            <td colspan="4"> {{ form.accountValidFlag.label }}<br/>{{ form.accountValidFlag }}</td>
+
+             <td>   {{ form.accountType.label }}<br/> {{ form.accountType }}</td>
+
+                 <td >{{ form.recordIdentifer }}</td>
+
+                 <td  >{{ form.recordRefernceNo }}</td>
             </tr>
-        </table>
+     <tr><td>{{form.errors}}</td></tr>
+     <tr>
+         <td colspan="10"> <hr class="new5"/></td>
+     </tr>
+
+
         {% endfor %}
 
-     <input type="submit" value="Submit">
+<tr>
+
+    <td colspan="8" align="center"><input type="submit" class="btn btn-primary" value="Submit"></td>
+</tr>
+      </table>
+
 </form>
 
 
