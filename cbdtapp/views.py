@@ -203,9 +203,15 @@ def upload_file(request):
         return render(request, 'cbdtapp/uploadfile.html', {'form': form})
 
 def handle_uploaded_file(f,request):
+    with open('static/inward/'+f.name, 'wb+') as destination:
+
+        for chunk in f.chunks():
+            destination.write(chunk)
+
     #take file and return context
     context={}
     records = []
+    header={}
     # read input file
     f = open('static/inward/'+f.name, 'r')
     if f.mode == 'r':
