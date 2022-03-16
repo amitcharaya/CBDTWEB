@@ -1,5 +1,5 @@
 from django.db import models
-
+from django_cryptography.fields import encrypt
 # Create your models here.
 class Header(models.Model):
     filename=models.CharField(max_length=100)
@@ -16,11 +16,11 @@ class Records(models.Model):
     recordIdentifer=models.CharField(max_length=2)
     recordRefernceNo=models.CharField(max_length=15)
     ifscCode=models.CharField(max_length=11)
-    destinationBankAccountNo=models.CharField(max_length=35)
+    destinationBankAccountNo=encrypt(models.CharField(max_length=35))
     accountValidFlag=models.CharField(max_length=2)
     jointAccountFlag=models.CharField(max_length=2)
-    primaryPan=models.CharField(max_length=10)
-    secondaryPan=models.CharField(max_length=10)
+    primaryPan=encrypt(models.CharField(max_length=10))
+    secondaryPan=encrypt(models.CharField(max_length=10))
     primaryAccountHolderName=models.CharField(max_length=50)
     secondaryAccountHolderName=models.CharField(max_length=50)
     accountType=models.CharField(max_length=2)
