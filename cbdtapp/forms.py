@@ -68,7 +68,7 @@ class ResponseFileRecordsForm(forms.Form):
     primaryPan = forms.CharField(max_length=10,label="Primary Person PAN",required=False)
     primaryPan.widget.attrs.update(size='10')
     secondaryPan = forms.CharField(max_length=10,label="Secondary Person PAN",required=False)
-    primaryAccountHolderName = forms.CharField(max_length=50,label="Primary Account Holder Name",required=True)
+    primaryAccountHolderName = forms.CharField(max_length=50,label="Primary Account Holder Name",required=False)
     secondaryAccountHolderName = forms.CharField(max_length=50,label="Secondary Account Holder Name",required=False)
     accountType = forms.ChoiceField(choices=AccountTypes, label="Account Type",required=False)
 
