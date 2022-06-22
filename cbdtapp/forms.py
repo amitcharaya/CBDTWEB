@@ -74,10 +74,12 @@ class ResponseFileRecordsForm(forms.Form):
 
     def clean(self):
         jointAccountFlag = self.cleaned_data.get('jointAccountFlag')
-
+        accountActiveFlag = self.cleaned_data.get('accountValidFlag')
         secondaryAccountHolderName = self.cleaned_data.get('secondaryAccountHolderName')
         print("in validations")
         print(jointAccountFlag)
+        if accountActiveFlag!="02":
+            raise ValidationError({'primaryAccountHolderName': ["This Filed is required", ]})
         if jointAccountFlag == "00" and not secondaryAccountHolderName :
             raise ValidationError({'secondaryAccountHolderName': ["This Filed is required",]})
 
